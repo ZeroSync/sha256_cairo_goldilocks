@@ -2,30 +2,21 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
 from starkware.cairo.common.registers import get_fp_and_pc
 
-const BLOCK_SIZE = 7;
-const ALL_ONES = 2 ** 251 - 1;
-// Pack the different instances with offsets of 35 bits. This is the maximal possible offset for
-// 7 32-bit words and it allows space for carry bits in integer addition operations (up to
-// 8 summands).
-const SHIFTS = 1 + 2 ** 35 + 2 ** (35 * 2) + 2 ** (35 * 3) + 2 ** (35 * 4) + 2 ** (35 * 5) + 2 ** (
-    35 * 6
-);
+// The goldilocks prime is defined as 2**64 - 2**32 + 1
+const ALL_ONES = 2 ** 63 - 1;
 
-// Given an array of size 16, extends it to the message schedule array (of size 64) by writing
-// 48 more values.
-// Each element represents 7 32-bit words from 7 difference instances, starting at bits
-// 0, 35, 35 * 2, ..., 35 * 6.
+// Given an array of size 16, extends it to the message schedule array (of size 64) by writing 48 more values.
 func compute_message_schedule{bitwise_ptr: BitwiseBuiltin*}(message: felt*) {
     alloc_locals;
 
     // Defining the following constants as local variables saves some instructions.
-    local shift_mask3 = SHIFTS * (2 ** 32 - 2 ** 3);
-    local shift_mask7 = SHIFTS * (2 ** 32 - 2 ** 7);
-    local shift_mask10 = SHIFTS * (2 ** 32 - 2 ** 10);
-    local shift_mask17 = SHIFTS * (2 ** 32 - 2 ** 17);
-    local shift_mask18 = SHIFTS * (2 ** 32 - 2 ** 18);
-    local shift_mask19 = SHIFTS * (2 ** 32 - 2 ** 19);
-    local mask32ones = SHIFTS * (2 ** 32 - 1);
+    local shift_mask3 = (2 ** 32 - 2 ** 3);
+    local shift_mask7 = (2 ** 32 - 2 ** 7);
+    local shift_mask10 = (2 ** 32 - 2 ** 10);
+    local shift_mask17 = (2 ** 32 - 2 ** 17);
+    local shift_mask18 = (2 ** 32 - 2 ** 18);
+    local shift_mask19 = (2 ** 32 - 2 ** 19);
+    local mask32ones = (2 ** 32 - 1);
 
     // Loop variables.
     tempvar bitwise_ptr = bitwise_ptr;
@@ -83,18 +74,18 @@ func compute_message_schedule{bitwise_ptr: BitwiseBuiltin*}(message: felt*) {
 }
 
 func sha2_compress{bitwise_ptr: BitwiseBuiltin*}(
-    state: felt*, message: felt*, round_constants: felt*
-) -> felt* {
+    state: felt*, message: felt*, round_constants: felt*, res: felt*
+) {
     alloc_locals;
 
     // Defining the following constants as local variables saves some instructions.
-    local shift_mask2 = SHIFTS * (2 ** 32 - 2 ** 2);
-    local shift_mask13 = SHIFTS * (2 ** 32 - 2 ** 13);
-    local shift_mask22 = SHIFTS * (2 ** 32 - 2 ** 22);
-    local shift_mask6 = SHIFTS * (2 ** 32 - 2 ** 6);
-    local shift_mask11 = SHIFTS * (2 ** 32 - 2 ** 11);
-    local shift_mask25 = SHIFTS * (2 ** 32 - 2 ** 25);
-    local mask32ones = SHIFTS * (2 ** 32 - 1);
+    local shift_mask2 = (2 ** 32 - 2 ** 2);
+    local shift_mask13 = (2 ** 32 - 2 ** 13);
+    local shift_mask22 = (2 ** 32 - 2 ** 22);
+    local shift_mask6 = (2 ** 32 - 2 ** 6);
+    local shift_mask11 = (2 ** 32 - 2 ** 11);
+    local shift_mask25 = (2 ** 32 - 2 ** 25);
+    local mask32ones = (2 ** 32 - 1);
 
     tempvar a = state[0];
     tempvar b = state[1];
@@ -186,7 +177,6 @@ func sha2_compress{bitwise_ptr: BitwiseBuiltin*}(
     jmp loop if n != 0;
 
     // Add the compression result to the original state:
-    let (res) = alloc();
     assert bitwise_ptr[0].x = state[0] + new_a;
     assert bitwise_ptr[0].y = mask32ones;
     assert res[0] = bitwise_ptr[0].x_and_y;
@@ -213,76 +203,76 @@ func sha2_compress{bitwise_ptr: BitwiseBuiltin*}(
     assert res[7] = bitwise_ptr[7].x_and_y;
     let bitwise_ptr = bitwise_ptr + 8 * BitwiseBuiltin.SIZE;
 
-    return res;
+    return ();
 }
 
 // Returns the 64 round constants of SHA256.
 func get_round_constants() -> felt* {
     alloc_locals;
     let (__fp__, _) = get_fp_and_pc();
-    local round_constants = 0x428A2F98 * SHIFTS;
-    local a = 0x71374491 * SHIFTS;
-    local a = 0xB5C0FBCF * SHIFTS;
-    local a = 0xE9B5DBA5 * SHIFTS;
-    local a = 0x3956C25B * SHIFTS;
-    local a = 0x59F111F1 * SHIFTS;
-    local a = 0x923F82A4 * SHIFTS;
-    local a = 0xAB1C5ED5 * SHIFTS;
-    local a = 0xD807AA98 * SHIFTS;
-    local a = 0x12835B01 * SHIFTS;
-    local a = 0x243185BE * SHIFTS;
-    local a = 0x550C7DC3 * SHIFTS;
-    local a = 0x72BE5D74 * SHIFTS;
-    local a = 0x80DEB1FE * SHIFTS;
-    local a = 0x9BDC06A7 * SHIFTS;
-    local a = 0xC19BF174 * SHIFTS;
-    local a = 0xE49B69C1 * SHIFTS;
-    local a = 0xEFBE4786 * SHIFTS;
-    local a = 0x0FC19DC6 * SHIFTS;
-    local a = 0x240CA1CC * SHIFTS;
-    local a = 0x2DE92C6F * SHIFTS;
-    local a = 0x4A7484AA * SHIFTS;
-    local a = 0x5CB0A9DC * SHIFTS;
-    local a = 0x76F988DA * SHIFTS;
-    local a = 0x983E5152 * SHIFTS;
-    local a = 0xA831C66D * SHIFTS;
-    local a = 0xB00327C8 * SHIFTS;
-    local a = 0xBF597FC7 * SHIFTS;
-    local a = 0xC6E00BF3 * SHIFTS;
-    local a = 0xD5A79147 * SHIFTS;
-    local a = 0x06CA6351 * SHIFTS;
-    local a = 0x14292967 * SHIFTS;
-    local a = 0x27B70A85 * SHIFTS;
-    local a = 0x2E1B2138 * SHIFTS;
-    local a = 0x4D2C6DFC * SHIFTS;
-    local a = 0x53380D13 * SHIFTS;
-    local a = 0x650A7354 * SHIFTS;
-    local a = 0x766A0ABB * SHIFTS;
-    local a = 0x81C2C92E * SHIFTS;
-    local a = 0x92722C85 * SHIFTS;
-    local a = 0xA2BFE8A1 * SHIFTS;
-    local a = 0xA81A664B * SHIFTS;
-    local a = 0xC24B8B70 * SHIFTS;
-    local a = 0xC76C51A3 * SHIFTS;
-    local a = 0xD192E819 * SHIFTS;
-    local a = 0xD6990624 * SHIFTS;
-    local a = 0xF40E3585 * SHIFTS;
-    local a = 0x106AA070 * SHIFTS;
-    local a = 0x19A4C116 * SHIFTS;
-    local a = 0x1E376C08 * SHIFTS;
-    local a = 0x2748774C * SHIFTS;
-    local a = 0x34B0BCB5 * SHIFTS;
-    local a = 0x391C0CB3 * SHIFTS;
-    local a = 0x4ED8AA4A * SHIFTS;
-    local a = 0x5B9CCA4F * SHIFTS;
-    local a = 0x682E6FF3 * SHIFTS;
-    local a = 0x748F82EE * SHIFTS;
-    local a = 0x78A5636F * SHIFTS;
-    local a = 0x84C87814 * SHIFTS;
-    local a = 0x8CC70208 * SHIFTS;
-    local a = 0x90BEFFFA * SHIFTS;
-    local a = 0xA4506CEB * SHIFTS;
-    local a = 0xBEF9A3F7 * SHIFTS;
-    local a = 0xC67178F2 * SHIFTS;
+    local round_constants = 0x428A2F98;
+    local a = 0x71374491;
+    local a = 0xB5C0FBCF;
+    local a = 0xE9B5DBA5;
+    local a = 0x3956C25B;
+    local a = 0x59F111F1;
+    local a = 0x923F82A4;
+    local a = 0xAB1C5ED5;
+    local a = 0xD807AA98;
+    local a = 0x12835B01;
+    local a = 0x243185BE;
+    local a = 0x550C7DC3;
+    local a = 0x72BE5D74;
+    local a = 0x80DEB1FE;
+    local a = 0x9BDC06A7;
+    local a = 0xC19BF174;
+    local a = 0xE49B69C1;
+    local a = 0xEFBE4786;
+    local a = 0x0FC19DC6;
+    local a = 0x240CA1CC;
+    local a = 0x2DE92C6F;
+    local a = 0x4A7484AA;
+    local a = 0x5CB0A9DC;
+    local a = 0x76F988DA;
+    local a = 0x983E5152;
+    local a = 0xA831C66D;
+    local a = 0xB00327C8;
+    local a = 0xBF597FC7;
+    local a = 0xC6E00BF3;
+    local a = 0xD5A79147;
+    local a = 0x06CA6351;
+    local a = 0x14292967;
+    local a = 0x27B70A85;
+    local a = 0x2E1B2138;
+    local a = 0x4D2C6DFC;
+    local a = 0x53380D13;
+    local a = 0x650A7354;
+    local a = 0x766A0ABB;
+    local a = 0x81C2C92E;
+    local a = 0x92722C85;
+    local a = 0xA2BFE8A1;
+    local a = 0xA81A664B;
+    local a = 0xC24B8B70;
+    local a = 0xC76C51A3;
+    local a = 0xD192E819;
+    local a = 0xD6990624;
+    local a = 0xF40E3585;
+    local a = 0x106AA070;
+    local a = 0x19A4C116;
+    local a = 0x1E376C08;
+    local a = 0x2748774C;
+    local a = 0x34B0BCB5;
+    local a = 0x391C0CB3;
+    local a = 0x4ED8AA4A;
+    local a = 0x5B9CCA4F;
+    local a = 0x682E6FF3;
+    local a = 0x748F82EE;
+    local a = 0x78A5636F;
+    local a = 0x84C87814;
+    local a = 0x8CC70208;
+    local a = 0x90BEFFFA;
+    local a = 0xA4506CEB;
+    local a = 0xBEF9A3F7;
+    local a = 0xC67178F2;
     return &round_constants;
 }

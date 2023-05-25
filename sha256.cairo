@@ -5,17 +5,11 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
-from utils.pow2 import pow2
+from pow2 import pow2
 
-from crypto.hash_utils import HASH_FELT_SIZE
+from sha256_packed import compute_message_schedule, sha2_compress, get_round_constants
 
-from crypto.sha256_packed import (
-    BLOCK_SIZE,
-    compute_message_schedule,
-    sha2_compress,
-    get_round_constants,
-)
-
+const HASH_FELT_SIZE = 8;
 const SHA256_INPUT_CHUNK_SIZE_FELTS = 16;
 const SHA256_INPUT_CHUNK_SIZE_BYTES = 64;
 // A 256-bit hash is represented as an array of 8 x Uint32
@@ -43,7 +37,9 @@ const SHA256_INSTANCE_SIZE = SHA256_INPUT_CHUNK_SIZE_FELTS + 2 * SHA256_STATE_SI
 // Note: You must call finalize_sha2() at the end of the program. Otherwise, this function
 // is not sound and a malicious prover may return a wrong result.
 // Note: the interface of this function may change in the future.
-func compute_sha256{range_check_ptr, sha256_ptr: felt*}(data: felt*, n_bytes: felt) -> felt* {
+func compute_sha256{bitwise_ptr: BitwiseBuiltin*, range_check_ptr, sha256_ptr: felt*}(
+    data: felt*, n_bytes: felt
+) -> felt* {
     alloc_locals;
 
     // Set the initial input state to IV.
@@ -66,25 +62,19 @@ func compute_sha256{range_check_ptr, sha256_ptr: felt*}(data: felt*, n_bytes: fe
 }
 
 // Computes the sha256 hash of the input chunk from `message` to `message + SHA256_INPUT_CHUNK_SIZE_FELTS`
-func _sha256_chunk{range_check_ptr, message: felt*, state: felt*, output: felt*}() {
-    %{
-        from starkware.cairo.common.cairo_sha256.sha256_utils import (
-            compute_message_schedule, sha2_compress_function)
-
-        _sha256_input_chunk_size_felts = int(ids.SHA256_INPUT_CHUNK_SIZE_FELTS)
-        assert 0 <= _sha256_input_chunk_size_felts < 100
-        _sha256_state_size_felts = int(ids.SHA256_STATE_SIZE_FELTS)
-        assert 0 <= _sha256_state_size_felts < 100
-        w = compute_message_schedule(memory.get_range(
-            ids.message, _sha256_input_chunk_size_felts))
-        new_state = sha2_compress_function(memory.get_range(ids.state, _sha256_state_size_felts), w)
-        segments.write_arg(ids.output, new_state)
-    %}
+func _sha256_chunk{bitwise_ptr: BitwiseBuiltin*, state: felt*, output: felt*}(message: felt*) {
+    alloc_locals;
+    let (expanded_message) = alloc();
+    let expanded_message_start = expanded_message;
+    memcpy(expanded_message, message, SHA256_INPUT_CHUNK_SIZE_FELTS);
+    compute_message_schedule(expanded_message_start);
+    let round_constants = get_round_constants();
+    sha2_compress(state, expanded_message_start, round_constants, output);
     return ();
 }
 
 // Inner loop for sha256. `sha256_ptr` points to the start of the block.
-func sha256_inner{range_check_ptr, sha256_ptr: felt*}(
+func sha256_inner{bitwise_ptr: BitwiseBuiltin*, range_check_ptr, sha256_ptr: felt*}(
     data: felt*, n_bytes: felt, total_bytes: felt
 ) {
     alloc_locals;
@@ -97,8 +87,10 @@ func sha256_inner{range_check_ptr, sha256_ptr: felt*}(
     let zero_total_bytes = is_le(total_bytes, 0);
 
     // If the previous message block was full we are still missing "1" at the end of the message
-    let (_, r_div_by_64) = unsigned_div_rem(total_bytes, 64);
-    let missing_bit_one = is_le(r_div_by_64, 0);
+    // let (_, r_div_by_64) = unsigned_div_rem(total_bytes, 64);
+    // let missing_bit_one = is_le(r_div_by_64, 0);
+    // TODO: use something other than unsigned_div_rem
+    let missing_bit_one = 1;
 
     // This works for 0 total bytes too, because zero_chunk will be -1 and, therefore, not 0.
     let zero_chunk = zero_bytes - zero_total_bytes - missing_bit_one;
@@ -110,7 +102,7 @@ func sha256_inner{range_check_ptr, sha256_ptr: felt*}(
         assert sha256_ptr[0] = 0;
         assert sha256_ptr[1] = total_bytes * 8;
         let sha256_ptr = sha256_ptr + 2;
-        _sha256_chunk{message=message, state=state, output=output}();
+        _sha256_chunk{state=state, output=output}(message);
         let sha256_ptr = sha256_ptr + SHA256_STATE_SIZE_FELTS;
 
         return ();
@@ -120,7 +112,7 @@ func sha256_inner{range_check_ptr, sha256_ptr: felt*}(
     let is_remainder_block = is_le(q, 0);
     if (is_remainder_block == 1) {
         _sha256_input(data, r, SHA256_INPUT_CHUNK_SIZE_FELTS, 0);
-        _sha256_chunk{message=message, state=state, output=output}();
+        _sha256_chunk{state=state, output=output}(message);
 
         let sha256_ptr = sha256_ptr + SHA256_STATE_SIZE_FELTS;
         memcpy(
@@ -133,7 +125,7 @@ func sha256_inner{range_check_ptr, sha256_ptr: felt*}(
         return sha256_inner(data=data, n_bytes=n_bytes - r, total_bytes=total_bytes);
     } else {
         _sha256_input(data, SHA256_INPUT_CHUNK_SIZE_BYTES, SHA256_INPUT_CHUNK_SIZE_FELTS, 0);
-        _sha256_chunk{message=message, state=state, output=output}();
+        _sha256_chunk{state=state, output=output}(message);
 
         let sha256_ptr = sha256_ptr + SHA256_STATE_SIZE_FELTS;
         memcpy(
@@ -199,193 +191,5 @@ func _sha256_input{range_check_ptr, sha256_ptr: felt*}(
 
     memset(dst=sha256_ptr + 1, value=0, n=n_words - 1);
     let sha256_ptr = sha256_ptr + n_words;
-    return ();
-}
-
-// Handles n blocks of BLOCK_SIZE SHA256 instances.
-// Taken from: https://github.com/starkware-libs/cairo-examples/blob/0d88b41bffe3de112d98986b8b0afa795f9d67a0/sha256/sha256.cairo#L102
-func _finalize_sha256_inner{range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    sha256_ptr: felt*, n: felt, round_constants: felt*
-) {
-    if (n == 0) {
-        return ();
-    }
-
-    alloc_locals;
-
-    local MAX_VALUE = 2 ** 32 - 1;
-
-    let sha256_start = sha256_ptr;
-
-    let (local message_start: felt*) = alloc();
-    let (local input_state_start: felt*) = alloc();
-
-    // Handle message.
-
-    tempvar message = message_start;
-    tempvar sha256_ptr = sha256_ptr;
-    tempvar range_check_ptr = range_check_ptr;
-    tempvar m = SHA256_INPUT_CHUNK_SIZE_FELTS;
-
-    message_loop:
-    tempvar x0 = sha256_ptr[0 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 0] = x0;
-    assert [range_check_ptr + 1] = MAX_VALUE - x0;
-    tempvar x1 = sha256_ptr[1 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 2] = x1;
-    assert [range_check_ptr + 3] = MAX_VALUE - x1;
-    tempvar x2 = sha256_ptr[2 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 4] = x2;
-    assert [range_check_ptr + 5] = MAX_VALUE - x2;
-    tempvar x3 = sha256_ptr[3 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 6] = x3;
-    assert [range_check_ptr + 7] = MAX_VALUE - x3;
-    tempvar x4 = sha256_ptr[4 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 8] = x4;
-    assert [range_check_ptr + 9] = MAX_VALUE - x4;
-    tempvar x5 = sha256_ptr[5 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 10] = x5;
-    assert [range_check_ptr + 11] = MAX_VALUE - x5;
-    tempvar x6 = sha256_ptr[6 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 12] = x6;
-    assert [range_check_ptr + 13] = MAX_VALUE - x6;
-    assert message[0] = x0 + 2 ** 35 * x1 + 2 ** (35 * 2) * x2 + 2 ** (35 * 3) * x3 +
-        2 ** (35 * 4) * x4 + 2 ** (35 * 5) * x5 + 2 ** (35 * 6) * x6;
-
-    tempvar message = message + 1;
-    tempvar sha256_ptr = sha256_ptr + 1;
-    tempvar range_check_ptr = range_check_ptr + 14;
-    tempvar m = m - 1;
-    jmp message_loop if m != 0;
-
-    // Handle input state.
-
-    tempvar input_state = input_state_start;
-    tempvar sha256_ptr = sha256_ptr;
-    tempvar range_check_ptr = range_check_ptr;
-    tempvar m = SHA256_STATE_SIZE_FELTS;
-
-    input_state_loop:
-    tempvar x0 = sha256_ptr[0 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 0] = x0;
-    assert [range_check_ptr + 1] = MAX_VALUE - x0;
-    tempvar x1 = sha256_ptr[1 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 2] = x1;
-    assert [range_check_ptr + 3] = MAX_VALUE - x1;
-    tempvar x2 = sha256_ptr[2 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 4] = x2;
-    assert [range_check_ptr + 5] = MAX_VALUE - x2;
-    tempvar x3 = sha256_ptr[3 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 6] = x3;
-    assert [range_check_ptr + 7] = MAX_VALUE - x3;
-    tempvar x4 = sha256_ptr[4 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 8] = x4;
-    assert [range_check_ptr + 9] = MAX_VALUE - x4;
-    tempvar x5 = sha256_ptr[5 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 10] = x5;
-    assert [range_check_ptr + 11] = MAX_VALUE - x5;
-    tempvar x6 = sha256_ptr[6 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 12] = x6;
-    assert [range_check_ptr + 13] = MAX_VALUE - x6;
-    assert input_state[0] = x0 + 2 ** 35 * x1 + 2 ** (35 * 2) * x2 + 2 ** (35 * 3) * x3 +
-        2 ** (35 * 4) * x4 + 2 ** (35 * 5) * x5 + 2 ** (35 * 6) * x6;
-
-    tempvar input_state = input_state + 1;
-    tempvar sha256_ptr = sha256_ptr + 1;
-    tempvar range_check_ptr = range_check_ptr + 14;
-    tempvar m = m - 1;
-    jmp input_state_loop if m != 0;
-
-    // Run sha256 on the 7 instances.
-
-    local sha256_ptr: felt* = sha256_ptr;
-    local range_check_ptr = range_check_ptr;
-    compute_message_schedule(message_start);
-    let outputs = sha2_compress(input_state_start, message_start, round_constants);
-    local bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-
-    // Handle outputs.
-
-    tempvar outputs = outputs;
-    tempvar sha256_ptr = sha256_ptr;
-    tempvar range_check_ptr = range_check_ptr;
-    tempvar m = SHA256_STATE_SIZE_FELTS;
-
-    output_loop:
-    tempvar x0 = sha256_ptr[0 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr] = x0;
-    assert [range_check_ptr + 1] = MAX_VALUE - x0;
-    tempvar x1 = sha256_ptr[1 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 2] = x1;
-    assert [range_check_ptr + 3] = MAX_VALUE - x1;
-    tempvar x2 = sha256_ptr[2 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 4] = x2;
-    assert [range_check_ptr + 5] = MAX_VALUE - x2;
-    tempvar x3 = sha256_ptr[3 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 6] = x3;
-    assert [range_check_ptr + 7] = MAX_VALUE - x3;
-    tempvar x4 = sha256_ptr[4 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 8] = x4;
-    assert [range_check_ptr + 9] = MAX_VALUE - x4;
-    tempvar x5 = sha256_ptr[5 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 10] = x5;
-    assert [range_check_ptr + 11] = MAX_VALUE - x5;
-    tempvar x6 = sha256_ptr[6 * SHA256_INSTANCE_SIZE];
-    assert [range_check_ptr + 12] = x6;
-    assert [range_check_ptr + 13] = MAX_VALUE - x6;
-
-    assert outputs[0] = x0 + 2 ** 35 * x1 + 2 ** (35 * 2) * x2 + 2 ** (35 * 3) * x3 +
-        2 ** (35 * 4) * x4 + 2 ** (35 * 5) * x5 + 2 ** (35 * 6) * x6;
-
-    tempvar outputs = outputs + 1;
-    tempvar sha256_ptr = sha256_ptr + 1;
-    tempvar range_check_ptr = range_check_ptr + 14;
-    tempvar m = m - 1;
-    jmp output_loop if m != 0;
-
-    return _finalize_sha256_inner(
-        sha256_ptr=sha256_start + SHA256_INSTANCE_SIZE * BLOCK_SIZE,
-        n=n - 1,
-        round_constants=round_constants,
-    );
-}
-
-// Verifies that the results of sha256() are valid.
-// Taken from: https://github.com/starkware-libs/cairo-examples/blob/0d88b41bffe3de112d98986b8b0afa795f9d67a0/sha256/sha256.cairo#L246
-func finalize_sha256{range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    sha256_ptr_start: felt*, sha256_ptr_end: felt*
-) {
-    alloc_locals;
-
-    let (__fp__, _) = get_fp_and_pc();
-
-    let round_constants = get_round_constants();
-
-    // We reuse the output state of the previous chunk as input to the next.
-    tempvar n = (sha256_ptr_end - sha256_ptr_start) / SHA256_INSTANCE_SIZE;
-    if (n == 0) {
-        return ();
-    }
-
-    %{
-        # Add dummy pairs of input and output.
-        from starkware.cairo.common.cairo_sha256.sha256_utils import (
-            IV, compute_message_schedule, sha2_compress_function)
-
-        _block_size = int(ids.BLOCK_SIZE)
-        assert 0 <= _block_size < 20
-        _sha256_input_chunk_size_felts = int(ids.SHA256_INPUT_CHUNK_SIZE_FELTS)
-        assert 0 <= _sha256_input_chunk_size_felts < 100
-
-        message = [0] * _sha256_input_chunk_size_felts
-        w = compute_message_schedule(message)
-        output = sha2_compress_function(IV, w)
-        padding = (message + IV + output) * (_block_size - 1)
-        segments.write_arg(ids.sha256_ptr_end, padding)
-    %}
-
-    // Compute the amount of blocks (rounded up).
-    let (local q, r) = unsigned_div_rem(n + BLOCK_SIZE - 1, BLOCK_SIZE);
-    _finalize_sha256_inner(sha256_ptr_start, n=q, round_constants=round_constants);
     return ();
 }
