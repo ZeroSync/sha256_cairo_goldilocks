@@ -34,8 +34,6 @@ const SHA256_INSTANCE_SIZE = SHA256_INPUT_CHUNK_SIZE_FELTS + 2 * SHA256_STATE_SI
 //
 // output is an array of 8 32-bit words (big endian).
 //
-// Note: You must call finalize_sha2() at the end of the program. Otherwise, this function
-// is not sound and a malicious prover may return a wrong result.
 // Note: the interface of this function may change in the future.
 func compute_sha256{bitwise_ptr: BitwiseBuiltin*, range_check_ptr, sha256_ptr: felt*}(
     data: felt*, n_bytes: felt
