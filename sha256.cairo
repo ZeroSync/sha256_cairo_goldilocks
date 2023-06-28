@@ -85,12 +85,10 @@ func sha256_inner{bitwise_ptr: BitwiseBuiltin*, range_check_ptr, sha256_ptr: fel
     let zero_total_bytes = is_le(total_bytes, 0);
 
     // If the previous message block was full we are still missing "1" at the end of the message
-    // let (_, r_div_by_64) = unsigned_div_rem(total_bytes, 64);
-    // let missing_bit_one = is_le(r_div_by_64, 0);
-    // TODO: use something other than unsigned_div_rem
-    let missing_bit_one = 1;
+    let (_, r_div_by_64) = unsigned_div_rem(total_bytes, 64);
+    let missing_bit_one = is_le(r_div_by_64, 0);
 
-    // This works for 0 total bytes too, because zero_chunk will be -1 and, therefore, not 0.
+    // This works for 0 total bytes too, because zero_chunk will be -1 and, therefore, not 1.
     let zero_chunk = zero_bytes - zero_total_bytes - missing_bit_one;
 
     let is_last_block = is_le(n_bytes, 55);
