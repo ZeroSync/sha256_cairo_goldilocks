@@ -15,7 +15,7 @@ A cairo implementation of sha256 for the goldilocks field
 | Max Memory        | about 274 GB  |              | 
 | Time              |    1634s      |              | 
 | Proof Size        | 808KB         |              | 
-| Steps (original)  | 148848        | 29675        | 
+| Steps (original)  | 148848        | 28562        | 
 | Steps (total)     | 8388608       | 1048576      | 
 | Bitwise cells     | 109198        | 15598        | 
 
