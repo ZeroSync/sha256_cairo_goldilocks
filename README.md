@@ -12,11 +12,12 @@ A cairo implementation of sha256 for the goldilocks field
 ### 7 hashes (each 80 bytes)
 |                   | Goldilocks    | STARK_prime  | 
 |-------------------|:-------------:|:------------:|
+| Layout            | all           | starknet     |
 | Max Memory        | about 274 GB  |              | 
 | Time              |    1634s      |              | 
 | Proof Size        | 808KB         |              | 
 | Steps (original)  | 148848        | 28562        | 
-| Steps (total)     | 8388608       | 1048576      | 
+| Steps (total)     | 8388608       | 262144       | 
 | Bitwise cells     | 109198        | 15598        | 
 
 Note that the number of steps is increased exponentially to accomodate the amount of bitwise cells.
