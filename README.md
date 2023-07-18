@@ -12,15 +12,17 @@ A cairo implementation of sha256 for the goldilocks field
 ### 7 hashes (each 80 bytes)
 |                   | Goldilocks    | STARK_prime  | 
 |-------------------|:-------------:|:------------:|
+| Sandstorm commit  | [7524a9d](https://github.com/andrewmilson/sandstorm-mirror/commit/7524a9dcdbf082bceaa6f4f319b7876bab21ca60)| [7524a9d](https://github.com/andrewmilson/sandstorm-mirror/commit/7524a9dcdbf082bceaa6f4f319b7876bab21ca60) |
 | Layout            | all           | starknet     |
-| Max Memory        | about 274 GB  |              | 
-| Time              |    1634s      |              | 
-| Proof Size        | 808KB         |              | 
+| Max Memory        | about 274 GB  | 44 GB        | 
+| Time              |    1634s      | 241s         | 
+| Proof Size        | 808KB         | 271KB        | 
+| Proof Security    |               | 39 bit       |
 | Steps (original)  | 148848        | 28562        | 
 | Steps (total)     | 8388608       | 262144       | 
 | Bitwise cells     | 109198        | 15598        | 
 
-Note that the number of steps is increased exponentially to accomodate the amount of bitwise cells.
+Note that the number of steps is increased exponentially to accomodate the amount of bitwise cells and highly dependant on the layout.
 
 # Commands
 Compile
