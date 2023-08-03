@@ -103,7 +103,38 @@ func main{output_ptr, pedersen_ptr, range_check_ptr, ecdsa_ptr, bitwise_ptr: Bit
                         '2sgI7YzM5nhaw2QCdlUq9Jiv931NPL22dO6Iii9LjMRN9GbGBGFILo838gotrEUfv8RaCxwyu0F1Qj9F',
                         '2Vwv7EFH1TVR7DtJXdz1gETKq0rWzfi2CpIg82ViIQqGOp8UcF0hs730pi069o8asq4BnedgYHVM8w2X',
                         'WxNFIaCjJcfsEVrEtHFRg17CB1PvcVtsguHK43N3XiNPQvi8onSJXdSIsHYomxwtTn4AWeXZm3JsAMFE',
-                        '2qHQgDMNqNTQWDEeAjHw9BRhHboO0lBWn9hewebKt9s6SmdafdjXzMXGQcgqpqq7a1nr0LBQVryAuibH']
+                        '2qHQgDMNqNTQWDEeAjHw9BRhHboO0lBWn9hewebKt9s6SmdafdjXzMXGQcgqpqq7a1nr0LBQVryAuibH',
+                        '2prlyGgGQxePq2aIVxPCuGQXqQ9eAqBzWCGVTEapI9jMOX6fXwmMey16OwPHK5dYn6huhCOEurkoSkTx',
+                        'ONL2TPFjoHBtFngAadBkDLzqLJpy1F1qguenoXt1AXusI1xETg1QE3rgUoYxTnSzQrNpvGN5lMD1l5Ke',
+                        'tMNURfCFmhefUQS1No0ZVDbaZjjjeFzo19Y1rpqYx4oZzklD9qrQ9D0u8RK3xh7RPPUZx3lYO2q9rWt9',
+                        'Kynxnnc4EUb3QB4bhKPJ3EbOgue8gmIzvi7lwSkt0sgg95fPWLglkofz0jhH8b8irOZWDF7gscBdpPos',
+                        'w0YvoSOf1K6e1W7VDyqyozZH4TGCjwdouYSdkvehza6893t4xd0W3pdOVw5sbocVNUsGwl6145aAwecn',
+                        'EttC3LufqjwaWVsFA3glfB4H3LUOfSWHwPHXitoCWRywHwITi857IdzlCjmGtoDnv3CJfaz46rkvH3IY',
+                        'orOHDDNZU5aNnmcnAN4KcrHQzfexCOgeHw5j7ShdVAjuAwU3tlmbrtbqnS18R6ZgyU2htDRlyIlMkiRm',
+                        'W4rkOP0TpbhYTTImsJwXTJGXRGRIJyBC8jXgwpAdlrWEONNBNwcIGdHakJkmWd8GvZ8tVIHjg82Utn0F',
+                        'FaL7gcrSQILjcFeaEYXLgjamHuAQZ4UqgnR22D7pmIdSkArywQbSQ4eM9JmkNuTR2LTZqxXoxKcwXFXi',
+                        'KHnM7jeNhAxVKJeiBNPgN9XV6Z0rIqNgYU1BoVCTcW7kBNrq8Jc8lglEb2LU8RFFIggcqK7GULi0KF9q',
+                        'DgUHPavP5oE2kiSjQjQFAsiijMzFW6B5qPxBkqKF3zem9sO25czA2X3h6R49vAPUgnOTSNbOx3lAG2R4',
+                        'KkE2t1NUlKjcAO6V0qMiahCHzLyc1CGCEiXwtlSnARLJn62ijya6GUuI0ehE82JllXwXgIVy7aONXRoX',
+                        'uFLNaHxPqrdyGN6TjoW2b6CTKnvD7jTx5eo4Mr6FVCcqyo2fy4LjIC58sp4iqQwQwlTgowZseOxtu4EF',
+                        'qxzOjFsy80r8bl1VMTaEufHprSz1tw612fs4Czv3La49rI0CKW2ROZyuqiaGlssstVYJ1ut1TvHwqVRU',
+                        'O8yABEZjKbYnFxLsTIv6myocm0xXc3FGo6kz17iRwqqiOAry42zsxoSaoUYJG95LuxiFDsB2eHiS2Eov',
+                        'wk8epVafi35S8V44LclJodEyX5k1GX6vBqQVUjqkoJW74cdEilKYdYH2E9l2369adknpe5EPEMHJJmbk',
+                        'a81sCvtaWTl7EUZBhCooZCdDrLheYOOx986z2ZHImHtlYa7Upp4VjJlLFloayIX0Z4qtZrjGCKbJGgFd',
+                        'djyiADnTfj5gKdzSBJw7YCrBVwnVNlfhp4xI1FcXVbta09wmb26suQ1LGSlKVKwFoJkwx4sYxXoRNzSE',
+                        'EZeLw16NcqVYgQ9QWNKvImpLryrTspQQLdnCXOHKP7JvnIAqGIXUTv67cBGuBRR27A6XrSwwetq0mjV9',
+                        '7x68Mqdh35oYDNBfd1GchQThzefp9OgYCuiHG3cNuqWLBLk930GXVmi4m7sUOUZVyq1UtH8Dk2cRUIi3',
+                        'V6n36aCjVHCqXdRBV5HElm3ajrMCofNZp8zYshgePMhCGJhDaM8zGkjZBe3jKItFvWLicsFm5I9B1JT1',
+                        'KqJFvJ9HMfBl4qu8wn4UtTjtM6wlpxmVbPllPhheyvvL2i3XogQsH9NHtehAiU2HSL7RMDFCtMZmVb6m',
+                        'SW1d0R7iBYzb9roljhh1tSTsg290MLpSWY83eQVHP2ipxJDbiATEOkd7W3vNnALG7uyM4JfDEI5FqwK1',
+                        'ciZP8PXySV1uqP3CoxzDzBYPtXCMFNXTrB7xeQVPgTBmjEDDy8n9uiq7YWGggQ4GA5CEaTG6UpfgRilS',
+                        'tgiUDp9nduDjWx3KOrWvNsosIdXDMZ714DyEpUfTOrJIRfvE7d8rA94xMwZGBbjsAltuT8K6LBehicMr',
+                        'NMoY1ciLTD8iSXfKFyzL0zu1ji7zgdMBVgwqGnMQ3Y3yT2lkxN7yrbF8DabyXdw00BZNREO6fVuT64kY',
+                        'meYha4i2O4WgrDBhbHlx3dUHtGZG84DtVCrfRvlembrBzgfi0kpMCYLjOwrpgbneBDJ0c4xKFc4nOTxP',
+                        'LangshJAuFRVJSFgdhlrLhqAoMJfwcumrzkYKgrxZrUvq2VR7dbGJlAnd4dRgmkitZ72JtQzgG1aK0gi',
+                        'viDysY70X8NCAvSEz7xAmPtNwH8VHqvCSwVfb31uKY6ra1tPxZjaK4Fo7h1RLLqMFnkyI3Gb7uQS2O5O',
+                        'BehgNLo7Vyk8cNT9PrSnWEo8xOlJnwq4a468O3GMG7WklY8uyOwoDPC8La0NVOUsNZ5SvxIIBQ8JzU94',
+                        ]
 
 
         def hex_to_felt(hex_string):
@@ -179,6 +210,36 @@ func main{output_ptr, pedersen_ptr, range_check_ptr, ecdsa_ptr, bitwise_ptr: Bit
         calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(31);
         calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(32);
         calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(33);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(34);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(35);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(36);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(37);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(38);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(39);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(40);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(41);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(42);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(43);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(44);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(45);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(46);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(47);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(48);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(49);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(50);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(51);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(52);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(53);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(54);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(55);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(56);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(57);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(58);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(59);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(60);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(61);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(62);
+        calculate_test_hash{range_check_ptr=range_check_ptr, bitwise_ptr=bitwise_ptr}(63);
     }
     finalize_sha256(sha256_ptr_start, sha256_ptr);
     return ();
